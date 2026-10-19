@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS cadena_frio;
+USE cadena_frio;
+
+CREATE TABLE IF NOT EXISTS lecturas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    temperatura FLOAT NOT NULL,
+    humedad FLOAT NOT NULL,
+    alerta BOOLEAN DEFAULT FALSE
+);

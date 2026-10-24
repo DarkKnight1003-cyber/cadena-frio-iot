@@ -28,3 +28,23 @@ El código de la ESP32 está en la carpeta `esp32`. Lee la temperatura y la hume
 7. Elige la placa ESP32 Dev Module y el puerto COM, y dale Subir. Si se queda en "Connecting...", mantén presionado el botón BOOT de la ESP32.
 8. Con `python app.py` corriendo, abre el Monitor Serie a 115200 baudios. Debe salir la temperatura, la humedad y "Respuesta del servidor: 200" en cada lectura.
 9. Si sale `-1` en lugar de 200, revisa la IP, que el servidor esté corriendo y que el firewall de Windows permita el puerto 5000 en redes privadas.
+
+## La parte en la nube (AWS)
+
+La segunda parte de la práctica se montó en AWS Academy, en la región us-east-1 (Norte de Virginia). Se creó una VPC llamada cadena-frio-vpc con una subred pública y dos subredes privadas. En la subred pública corre una máquina virtual EC2 con Ubuntu, que ejecuta el servidor Flask y tiene asignada una IP elástica, para que su dirección no cambie cuando el laboratorio se apaga y se enciende. En las subredes privadas está la base de datos MySQL, creada con el servicio RDS, sin acceso público: solo el servidor puede conectarse a ella.
+
+Los grupos de seguridad controlan quién puede entrar. El grupo del servidor permite el puerto 5000 (para que la ESP32 envíe los datos) y el puerto 22 (para administrar la máquina). La base de datos solo acepta tráfico que venga del servidor, por el puerto 3306.
+
+Para replicarlo, estos son los pasos:
+
+1. Crear la VPC con el asistente "VPC y más", con una subred pública y una privada, sin puerta de enlace NAT. Agregar una segunda subred privada en otra zona de disponibilidad, porque RDS lo exige.
+2. Lanzar una instancia EC2 con Ubuntu en la subred pública, con la clave vockey, y un grupo de seguridad que permita los puertos 22 y 5000.
+3. Asignar una dirección IP elástica y asociarla a la instancia.
+4. Crear la base de datos en RDS con el motor MySQL, en la capa gratuita, dentro de la VPC, con acceso público desactivado y conectada a la instancia EC2. Poner `cadena_frio` como nombre de la base inicial.
+5. Conectarse a la instancia, instalar python3-venv, pip, git y mysql-client, y clonar este repositorio.
+6. Crear el entorno virtual, instalar las librerías con `pip install -r requirements.txt` y copiar `config.example.py` como `config.py`, poniendo el punto de enlace de RDS, el usuario admin y su contraseña.
+7. Entrar a la base con el cliente mysql y crear la tabla con el contenido de `crear_tabla.sql`.
+8. Arrancar el servidor en segundo plano con `nohup python app.py > flask.log 2>&1 &`.
+9. En el código de la ESP32, cambiar la línea del servidor por `http://IP_ELASTICA:5000/datos`, poniendo la IP elástica de su propia instancia.
+
+Las horas guardadas en la base de datos y en el CSV están en UTC, que son cinco horas más que la hora de Colombia.

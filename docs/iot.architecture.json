@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Cadena de frio IoT en AWS",
+    "output": "iot.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "esp32", "type": "external", "label": "ESP32 + DHT22", "sublabel": "Temp + humedad", "pos": [20, 200], "size": [130, 54] },
+    { "id": "internet", "type": "external", "label": "Internet", "sublabel": "WiFi 2.4 GHz", "pos": [190, 200], "size": [100, 54] },
+    { "id": "igw", "type": "cloud", "label": "Internet Gateway", "sublabel": "Entrada a la VPC", "pos": [340, 200], "size": [140, 54] },
+    { "id": "flask", "type": "backend", "label": "Servidor Flask", "sublabel": "EC2 :5000 | IP elastica", "pos": [540, 200], "size": [180, 54] },
+    { "id": "csv", "type": "database", "label": "lecturas.csv", "sublabel": "Archivo en el servidor", "pos": [540, 70], "size": [180, 50] },
+    { "id": "rds", "type": "database", "label": "MySQL (RDS)", "sublabel": "3306 | sin acceso publico", "pos": [820, 200], "size": [190, 54] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "VPC cadena-frio-vpc (10.0.0.0/16)", "wraps": ["igw", "flask", "csv", "rds"] },
+    { "kind": "region", "label": "Subred publica | SG: puertos 22 y 5000", "wraps": ["flask", "csv"] },
+    { "kind": "security-group", "label": "Subred privada | SG: 3306 solo desde el servidor", "wraps": ["rds"] }
+  ],
+  "connections": [
+    { "id": "esp32-to-internet", "from": "esp32", "to": "internet", "label": "HTTP POST", "variant": "emphasis", "labelDy": -21 },
+    { "id": "internet-to-igw", "from": "internet", "to": "igw", "label": "IP elastica", "labelDy": -21 },
+    { "id": "igw-to-flask", "from": "igw", "to": "flask", "label": "puerto 5000", "labelDy": -21 },
+    { "id": "flask-to-rds", "from": "flask", "to": "rds", "label": "INSERT", "variant": "security", "labelDy": -21 },
+    { "id": "flask-to-csv", "from": "flask", "to": "csv", "label": "agrega fila", "fromSide": "top", "toSide": "bottom", "labelAt": [660, 155] },
+    { "id": "flask-response", "from": "flask", "to": "esp32", "label": "200 + alerta", "variant": "dashed", "fromSide": "bottom", "toSide": "bottom", "via": [[630, 300], [85, 300]] }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Medicion", "items": ["DHT22 mide temperatura y humedad", "La ESP32 envia una lectura cada 5 segundos", "Conexion por WiFi con HTTP POST"] },
+    { "dot": "cyan", "title": "Nube (AWS)", "items": ["VPC con subred publica y privada", "Servidor Flask en EC2 con IP elastica", "Base de datos MySQL en RDS, sin acceso publico"] },
+    { "dot": "rose", "title": "Alerta y seguridad", "items": ["Rango seguro de 2 a 8 grados C", "Fuera del rango la lectura se marca como alerta", "La base solo acepta trafico del servidor"] }
+  ]
+}

@@ -31,6 +31,10 @@ El código de la ESP32 está en la carpeta `esp32`. Lee la temperatura y la hume
 
 ## La parte en la nube (AWS)
 
+![Diagrama de la arquitectura en AWS](docs/diagrama-aws.png)
+
+El diagrama se generó con Archify. Su fuente está en `docs/iot.architecture.json` y la versión interactiva en `docs/iot.html`.
+
 La segunda parte de la práctica se montó en AWS Academy, en la región us-east-1 (Norte de Virginia). Se creó una VPC llamada cadena-frio-vpc con una subred pública y dos subredes privadas. En la subred pública corre una máquina virtual EC2 con Ubuntu, que ejecuta el servidor Flask y tiene asignada una IP elástica, para que su dirección no cambie cuando el laboratorio se apaga y se enciende. En las subredes privadas está la base de datos MySQL, creada con el servicio RDS, sin acceso público: solo el servidor puede conectarse a ella.
 
 Los grupos de seguridad controlan quién puede entrar. El grupo del servidor permite el puerto 5000 (para que la ESP32 envíe los datos) y el puerto 22 (para administrar la máquina). La base de datos solo acepta tráfico que venga del servidor, por el puerto 3306.
@@ -48,3 +52,4 @@ Para replicarlo, estos son los pasos:
 9. En el código de la ESP32, cambiar la línea del servidor por `http://IP_ELASTICA:5000/datos`, poniendo la IP elástica de su propia instancia.
 
 Las horas guardadas en la base de datos y en el CSV están en UTC, que son cinco horas más que la hora de Colombia.
+

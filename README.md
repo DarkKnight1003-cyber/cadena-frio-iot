@@ -53,3 +53,11 @@ Para replicarlo, estos son los pasos:
 
 Las horas guardadas en la base de datos y en el CSV están en UTC, que son cinco horas más que la hora de Colombia.
 
+
+---
+
+## Actividad 2 - MQTT, InfluxDB y Grafana
+
+Implementacion de monitoreo IoT de cadena de frio utilizando ESP32, MQTT, AWS, InfluxDB y Grafana, con alertas automaticas por correo electronico.
+
+[Ver codigo y documentacion de la Actividad 2](actividad2/README.md)

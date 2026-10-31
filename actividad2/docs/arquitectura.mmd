@@ -1,0 +1,20 @@
+flowchart LR
+    ESP[ESP32 + DHT22] -->|Wi-Fi / MQTT autenticado :1883| MQTT
+    SIM[Simulador Python] -->|MQTT local| MQTT
+    PC[PC: MQTT Explorer] -->|MQTT :1883| MQTT
+    subgraph VPC[AWS VPC 10.0.0.0/16]
+      subgraph PUB[Subred pública - EC2 Ubuntu]
+        MQTT[Mosquitto broker]
+        ING[Python: suscriptor MQTT]
+        CSV[(CSV local)]
+        GF[Grafana :3000]
+        MQTT -->|mensajes en 3 topics| ING
+        ING --> CSV
+      end
+      subgraph PRIV[Subred privada - EC2 Ubuntu]
+        INF[(InfluxDB OSS :8086)]
+      end
+      ING -->|API de escritura :8086| INF
+      GF -->|Consultas Flux :8086| INF
+    end
+    GF -->|SMTP STARTTLS :587| EMAIL[Correo de alerta]

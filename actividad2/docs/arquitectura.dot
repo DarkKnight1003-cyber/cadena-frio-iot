@@ -1,0 +1,31 @@
+digraph G {
+  graph [rankdir=LR,bgcolor="white",splines=polyline,compound=true,pad="0.3",nodesep="0.5",ranksep="0.65",fontname="DejaVu Sans"];
+  node [shape=box,style="rounded,filled",color="#C9D5E2",fillcolor="#F5F8FC",fontname="DejaVu Sans",fontsize=12,margin="0.19,0.13"];
+  edge [fontname="DejaVu Sans",fontsize=10,color="#47647D",arrowsize=0.7];
+  esp [label="ESP32 + DHT22\nSensor físico",fillcolor="#DCFCE7",color="#65A97B"];
+  pc [label="Computador\nMQTT Explorer"];
+  mail [label="Gmail personal\nAviso automático",fillcolor="#FDE8E7",color="#D48B83"];
+  subgraph cluster_vpc {
+    label="AWS Academy — VPC cadena-frio-mqtt-vpc (10.0.0.0/16)";labelloc=t;style="rounded,filled";fillcolor="#F8FAFD";color="#C2CFDC";fontsize=15;fontname="DejaVu Sans";
+    subgraph cluster_pub {
+      label="SUBRED PÚBLICA — EC2 Ubuntu 24.04 (10.0.15.4)";color="#80B8E5";fillcolor="#EAF5FF";style="rounded,filled";fontsize=12;
+      mqtt [label="Mosquitto\nMQTT autenticado · TCP 1883",fillcolor="#FFFFFF"];
+      sim [label="Simulador MQTT\nPython (pruebas)",fillcolor="#FFFFFF"];
+      py [label="Suscriptor Python\nMQTT → CSV e InfluxDB",fillcolor="#FFFFFF"];
+      csv [label="Archivo CSV\nLecturas",shape=cylinder,fillcolor="#FFFFFF"];
+      graf [label="Grafana\nPaneles y alertas · TCP 3000",fillcolor="#FFFFFF"];
+    }
+    subgraph cluster_priv {
+      label="SUBRED PRIVADA — EC2 Ubuntu 24.04 (10.0.13.49)";color="#C7A4E7";fillcolor="#F2EBFA";style="rounded,filled";fontsize=12;
+      influx [label="InfluxDB OSS 2.9.1\nBucket: lecturas_iot · TCP 8086",shape=cylinder,fillcolor="#FFFFFF"];
+    }
+  }
+  esp -> mqtt [label="MQTT 1883"];
+  pc -> mqtt [label="MQTT Explorer"];
+  sim -> mqtt [label="Pruebas locales"];
+  mqtt -> py [label="Topics"];
+  py -> csv [label="Escritura local"];
+  py -> influx [label="HTTP API 8086"];
+  influx -> graf [label="Consulta Flux 8086",dir=back];
+  graf -> mail [label="SMTP 587"];
+}

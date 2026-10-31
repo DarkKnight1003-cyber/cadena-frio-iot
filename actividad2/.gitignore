@@ -1,0 +1,19 @@
+# Credenciales y configuraciones sensibles (Actividad 2)
+**/secrets.h
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/grafana.ini
+**/passwd
+**/*token*.txt
+**/*password*.txt
+
+# Datos reales, archivos temporales y entornos
+**/lecturas.csv
+**/*.log
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/venv/
+.DS_Store
